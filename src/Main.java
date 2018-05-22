@@ -40,6 +40,14 @@ public class Main {
                 "@mail.ru"
         );
 
+        List<String> sockets = Arrays.asList(
+                "http://socketone.com:60000",
+                "http://localhost:8080",
+                "https://-socket:8080",
+                "http://sok3t",
+                "http://soo#::08"
+        );
+
         for (String str : ipAddresses)
             System.out.println(str + " is IP: " + Validator.isIP(str));
 
@@ -58,6 +66,11 @@ public class Main {
         System.out.println("[Emails]");
         for (String str : emails)
             System.out.println(str + " is an email: " + Validator.isEmail(str));
+
+        System.out.println();
+        System.out.println("[Sockets]");
+        for (String str : sockets)
+            System.out.println(str + " is a socket: " + Validator.isSocket(str));
     }
 }
 
@@ -190,6 +203,30 @@ class Validator{
     }
 
     public static boolean isSocket(String socket){
+        if (!socket.contains("/")) return false;
+        if (!socket.startsWith("http://") && !socket.startsWith("https://")) return false;
+        if (!Character.isDigit(socket.charAt(socket.length()-1))) return false;
+        if (!socket.contains(":")) return false;
+        if (socket.contains("::")) return false;
+        if (socket.contains("..")) return false;
+
+        String subSocket = socket.substring(socket.lastIndexOf("/")+1, socket.lastIndexOf(":"));
+        String [] subSocketSplit;
+        if (!subSocket.contains(".")){
+            return subSocket.equals("localhost");
+        }
+
+        subSocketSplit = subSocket.split("\\.");;
+        for (String str : subSocketSplit)
+            if (!str.chars().allMatch(Character::isLetterOrDigit)) return false;
+
+        String afterDoublePoint = socket.substring(socket.lastIndexOf(":")+1);
+        try{
+            if (Integer.parseInt(afterDoublePoint) < 0 || Integer.parseInt(afterDoublePoint) > 65535) return false;
+        }catch (NumberFormatException e){
+            return false;
+        }
+
         return true;
     }
 }
